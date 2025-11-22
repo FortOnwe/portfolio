@@ -1,0 +1,998 @@
+import React, { useState, useEffect, useRef } from 'react';
+// framer-motion is required for the animations
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import {
+  Github,
+  Linkedin,
+  Mail,
+  MapPin,
+  Briefcase,
+  Code,
+  Database,
+  LineChart,
+  Server,
+  ExternalLink,
+  Moon,
+  Sun,
+  Download,
+  ChevronDown,
+  GraduationCap,
+  Award,
+  BrainCircuit, 
+  ArrowUpRight,
+  ArrowLeft,
+  CheckCircle2,
+  Layers,
+  Terminal,
+  Users, // For Community Section
+  Menu
+} from 'lucide-react';
+
+// --- CUSTOM ICONS ---
+
+// The Official X (Twitter) Brand Logo
+const XLogo = ({ size = 20, className = '', ...props }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    stroke="none"
+    className={className}
+    {...props}
+  >
+    <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
+  </svg>
+);
+
+// --- ICON MAP ---
+const LucideIcons = {
+  Github,
+  Linkedin,
+  Mail,
+  MapPin,
+  Briefcase,
+  Code,
+  Database,
+  LineChart,
+  Server,
+  ExternalLink,
+  Moon,
+  Sun,
+  Download,
+  ChevronDown,
+  GraduationCap,
+  Award,
+  BrainCircuit,
+  ArrowUpRight,
+  ArrowLeft,
+  CheckCircle2,
+  Layers,
+  Terminal,
+  Users,
+  XLogo
+};
+
+// --- ANIMATION WRAPPER ---
+const FadeInSection = ({ as: Component = 'section', children, className = '', ...props }) => {
+  const shouldReduceMotion = useReducedMotion();
+
+  if (shouldReduceMotion) {
+    return (
+      <Component className={className} {...props}>
+        {children}
+      </Component>
+    );
+  }
+
+  return (
+    <motion.section
+      className={className}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.45, ease: 'easeOut' }}
+      {...props}
+    >
+      {children}
+    </motion.section>
+  );
+};
+
+// --- DATA ---
+
+const portfolioData = {
+  personal: {
+    name: 'Fortune Nwachukwu Onwe',
+    role: 'Technical Product & Ops Leader',
+    location: 'Lagos, Nigeria (Open to Remote)',
+    email: 'fortonwe@gmail.com',
+    linkedin: 'https://linkedin.com/in/fortune-onwe',
+    twitter: 'https://x.com/OnweFortune',
+    // Placeholder headshot - replace with local path in production if needed
+    headshot: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Fortune&backgroundColor=c0aede',
+    summary:
+      'I build and scale technical products and systems at the intersection of product, operations, data, and growth. Over the last 3+ years, I have worked across payments, mobility, event platforms, and digital services—leading delivery, working closely with engineers, and partnering with business stakeholders to ship reliable products. I am now focused on applying AI and data skills to design smarter, globally relevant products.'
+  },
+  skills: [
+    {
+      category: 'Technical Product Management',
+      items: [
+        'API & Platform Design',
+        'Microservices Strategy',
+        'AWS (Lambda, DynamoDB)',
+        'CI/CD Pipelines',
+        'Cloud Infrastructure'
+      ]
+    },
+    {
+      category: 'Product Strategy & Delivery',
+      items: [
+        'Roadmapping',
+        'MVP Definition',
+        'Go-To-Market (GTM)',
+        'Agile/Scrum',
+        'SDLC Optimization',
+        'Stakeholder Management'
+      ]
+    },
+    {
+      category: 'Data & Experimentation',
+      items: [
+        'SQL',
+        'Python (Pandas)',
+        'Tableau',
+        'A/B Testing',
+        'Funnel Optimization',
+        'Cohort & Retention Analysis'
+      ]
+    },
+    {
+      category: 'Engineering Leadership',
+      items: [
+        'Backlog Prioritization',
+        'Sprint Planning',
+        'DevOps Collaboration',
+        'Latency Optimization',
+        'QA Automation'
+      ]
+    }
+  ],
+  aiProjects: [
+    {
+      id: 'analytics-pipeline',
+      title: 'Lightweight Product Analytics Pipeline',
+      badge: 'AI & Data Lab',
+      timeframe: 'Side project · 2025',
+      role: 'Technical Product & Data',
+      summary:
+        'From raw event data to a simple, reliable analytics layer that product and ops can actually act on.',
+      problem:
+        'Teams were making decisions from scattered CSV exports and ad-hoc dashboards, leading to inconsistent metrics and slow decision-making.',
+      context: [
+        'Self-initiated lab project to design a minimal analytics stack suitable for a small SaaS or platform team.',
+        'Assumed a typical B2B product with user, session, event, and subscription data coming from the app and a payments provider.',
+      ],
+      approach: [
+        'Started from the questions (activation, feature adoption, retention, and plan performance) before designing any tables or charts.',
+        'Modelled data into a small set of logical tables (users, accounts, events, subscriptions) and reusable queries for funnels and cohorts.',
+        'Used Python and Pandas to clean raw events, join payment data, and create pre-aggregated views for dashboards.',
+        'Documented how PMs and ops would use the views in weekly and monthly rituals (what to look at, what decisions to make).',
+      ],
+      impact: [
+        'Created a single, documented source of truth for core product and revenue metrics.',
+        'Replaced one-off CSV pulls with a repeatable analytics workflow aligned with product questions and roadmap decisions.',
+      ],
+      stack: ['Python', 'Pandas', 'SQL (conceptual)', 'Event data model', 'Dashboarding tool'],
+      responsibilities: [
+        'Problem framing and analytics requirements.',
+        'Data modelling and query design.',
+        'Documentation tailored for non-technical stakeholders.',
+      ],
+      icon: 'Database'
+    },
+    {
+      id: 'ai-support-assistant',
+      title: 'AI-Assisted Support Triage and Routing Concept',
+      badge: 'AI & Product',
+      timeframe: 'Concept + prototype · 2025',
+      role: 'AI Product Thinking',
+      summary:
+        'Designed an AI-assisted workflow to classify, prioritise, and route support tickets while keeping humans in control.',
+      problem:
+        'Support teams spend time manually triaging tickets and routing them to the right owner, slowing down response times and causing inconsistent prioritisation.',
+      context: [
+        'Lab project using anonymised or synthetic support tickets for a typical SaaS/payments product.',
+        'Goal was to design the product flow, system boundaries, and safety rails for an LLM-powered assistant.',
+      ],
+      approach: [
+        'Defined ticket types (billing, bug, account access, feature request, fraud) and clear routing rules for each.',
+        'Designed a prompt and schema for an LLM to classify tickets, suggest priority, and propose an initial response draft.',
+        'Kept a human firmly in the loop: agent reviews and edits suggestions, and the system logs overrides to improve future prompts.',
+        'Outlined metrics and guardrails: misclassification rate, manual override rate, response time, and reasons to fall back to humans only.',
+      ],
+      impact: [
+        'Produced a concrete, implementation-ready spec for an AI-assisted triage feature a team could build.',
+        'Clarified where AI adds leverage and where it must defer to humans, reducing the risk of over-automation.',
+      ],
+      stack: ['LLM (conceptual)', 'Prompt design', 'Support ticket system', 'Monitoring & metrics'],
+      responsibilities: [
+        'Workflow and UX design for the support assistant.',
+        'Risk analysis and definition of human-in-the-loop safeguards.',
+        'Metric definition to evaluate whether the assistant is actually helping.',
+      ],
+      icon: 'BrainCircuit'
+    },
+    {
+      id: 'churn-and-activation',
+      title: 'Churn and Activation Signals Exploration',
+      badge: 'Analytics & Retention',
+      timeframe: 'Exploratory analysis · 2025',
+      role: 'Product Analytics',
+      summary:
+        'Explored which early behaviours correlate with retention to inform onboarding and activation decisions.',
+      problem:
+        'Product teams often ship onboarding flows without a clear view of which early behaviours actually predict long-term retention.',
+      context: [
+        'Exploratory lab analysis using a synthetic or anonymised dataset with sign-ups, sessions, key actions, and churn flags.',
+        'Target was to understand activation moments and behaviours that differentiate retained users from churned users.',
+      ],
+      approach: [
+        'Defined churn and retention windows explicitly (for example, churned if inactive for 30 days after trial).',
+        'Built simple funnels from sign-up to key actions (profile completion, first project created, first team invite).',
+        'Compared behaviour distributions between retained and churned cohorts for the first 7–14 days.',
+        'Translated findings into concrete product hypotheses for onboarding and lifecycle messaging.',
+      ],
+      impact: [
+        'Identified a small set of “must-have” early behaviours that can be targeted in onboarding and in-app nudges.',
+        'Created a repeatable template for retention analysis that can be reused on future products or datasets.',
+      ],
+      stack: ['Python or SQL', 'Cohort analysis', 'Basic visualisation', 'Spreadsheet / BI tool'],
+      responsibilities: [
+        'Analytics framing and definition of churn/retention metrics.',
+        'Exploratory data analysis and visualisation.',
+        'Product interpretation of findings into roadmap and experiment ideas.',
+      ],
+      icon: 'LineChart'
+    },
+  ],
+  experienceMain: [
+    {
+      company: 'Tent App',
+      role: 'Technical Product Lead',
+      period: 'Oct 2023 - Present',
+      type: 'Remote',
+      description:
+        'Leading technical roadmap for a high-concurrency event discovery platform.',
+      achievements: [
+        'Improved platform performance by 20% and maintained p95 latency < 200ms via AWS Serverless migration.',
+        'Increased feature release velocity and reduced development cycle time by 30% through Docker-based CI/CD pipelines in GitHub Actions.',
+        'Lead a cross-functional team of 6 engineers and designers to align technical trade-offs with user growth targets.'
+      ]
+    },
+    {
+      company: 'Antena Media Solutions Limited',
+      role: 'Technical Product Lead',
+      period: 'Feb 2023 – Aug 2024',
+      type: 'Remote',
+      description:
+        'Launched MVP for a programmatic Digital Out-Of-Home (DOOH) platform monetizing gig-economy drivers.',
+      achievements: [
+        'Launched the MVP for a DOOH platform connecting retail brands to gig-economy drivers with vehicle-mounted ad inventory.',
+        'Designed “Proof of Performance” verification using geolocation & QR analytics to calculate driver payouts based on visibility and conversion.',
+        'Reduced SDLC time by 25% by championing a microservices architecture that decoupled the driver mobile app from the ad-serving engine.'
+      ]
+    },
+    {
+      company: 'Shuttle9ja',
+      role: 'Associate Product Manager',
+      period: 'Sep 2022 – Feb 2024',
+      type: 'Ilishan-Remo, Nigeria',
+      description: 'Optimized matching algorithms for a mobility platform.',
+      achievements: [
+        'Reduced average driver wait time by 11% and increased NPS by +19 points by owning optimization of the matching algorithm.',
+        'Partnered with engineering to prioritize backlog items around supply-side liquidity and measurable impact on completion rates.'
+      ]
+    }
+  ],
+  experienceVentures: [
+    {
+      company: 'Nationwide Payments & Cardnetix',
+      role: 'Business Development Manager (Contract)',
+      period: 'Nov 2024 – Present',
+      achievements: [
+        'Defined go-to-market strategies for payment infrastructure products, identifying high-value merchant segments.',
+        'Architected executive analytics dashboards to monitor revenue quality and partner performance.'
+      ]
+    },
+    {
+      company: 'Fitness Yomallu',
+      role: 'Co-Founder & Technical Product Architect (Project)',
+      period: 'Sep 2022 – Dec 2023',
+      achievements: [
+        'Co-founded and led the technical build of a lean e-commerce product to test real user behavior.',
+        'Gained practical zero-to-one experience: shipping, breaking, fixing, and learning from real constraints.',
+        'Deployed a Python/Scikit-learn recommendation engine to personalize cross-sell journeys.'
+      ]
+    },
+    {
+      company: 'Divas Naturals',
+      role: 'Growth & Data Strategy Advisor',
+      period: 'Mar 2022 – Oct 2024',
+      achievements: [
+        'Established an A/B testing framework that reduced CPA to 20% below industry benchmarks.',
+        'Drove a 42% increase in online sales via a data-led paid media strategy and optimized funnel mechanics.'
+      ]
+    }
+  ],
+  experienceCommunity: [
+    {
+      company: 'Wecncode',
+      role: 'Tech Mentor (Volunteer)',
+      period: 'Jan 2025 – Present',
+      achievements: [
+        'Mentor aspiring Product Managers and Data Scientists on system design, technical fundamentals, and career strategy, achieving 90% mentee satisfaction.'
+      ]
+    },
+    {
+      company: 'Appen',
+      role: 'Independent Contractor',
+      period: 'Sep 2022 – Feb 2023',
+      achievements: [
+        'Contributed to high-volume AI/ML model training by annotating 15,000+ data items with 99.7% accuracy, exceeding team throughput targets by 18%.'
+      ]
+    },
+    {
+      company: 'Aview International',
+      role: 'Data Analyst',
+      period: 'Sep 2022 – Feb 2023',
+      achievements: [
+        'Built Tableau dashboards to visualize marketing KPIs and automated reporting workflows, improving CTR by more than 10% and reducing reporting turnaround time by 40%.'
+      ]
+    },
+    {
+      company: 'First Bank of Nigeria',
+      role: 'Trainee',
+      period: 'Feb 2022 – Jun 2022',
+      achievements: [
+        'Consolidated legacy datasets to improve data accuracy by 15% across five systems and resolved 50+ technical tickets with a 4.5/5 CSAT rating.'
+      ]
+    },
+    {
+      company: 'Big Daddy Ape Club',
+      role: 'Blockchain Project Manager',
+      period: 'Nov 2021 – Mar 2022',
+      achievements: [
+        'Managed the launch of a 9,000-asset NFT collection, coordinating smart contract deployment and go-to-market; optimized code to reduce gas fees by 5%.'
+      ]
+    }
+  ],
+  education: [
+    {
+      school: 'Babcock University',
+      degree: 'B.Sc. Computer Science',
+      year: '2023',
+      details:
+        'Core Team Member GDSC; Blockchain Track Lead.',
+      coursework: [
+        'Data Structures & Algorithms',
+        'Statistics',
+        'Operational Research',
+        'Artificial Intelligence',
+        'Machine Learning with Python',
+        'Modelling & Simulation'
+      ]
+    }
+  ],
+  certifications: [
+    {
+        name: 'Certified Project Manager',
+        issuer: 'Star Global College',
+        id: '62395908',
+        link: 'https://credentials.starglobal.education/6bba4184-0ac7-40ea-9f51-3b9001db4507#gs.f3jd2g'
+    },
+    {
+        name: 'Lean Six Sigma Champion',
+        issuer: 'Star Global College',
+        id: '128568149',
+        link: 'https://credentials.starglobal.education/23c316f8-9e00-47b6-9202-3de66aa5d9d6'
+    }
+  ]
+};
+
+// --- COMPONENTS ---
+
+const Icon = ({ name, size = 20, className, ...props }) => {
+  // Map "X" requests to our custom XLogo
+  if (name === 'X' || name === 'Twitter') {
+    return <XLogo size={size} className={className} {...props} />;
+  }
+
+  const IconComponent = LucideIcons[name];
+
+  if (!IconComponent) {
+    return null;
+  }
+
+  return <IconComponent size={size} className={className} {...props} />;
+};
+
+const Navbar = ({ darkMode, toggleTheme, onNavigate }) => (
+  <nav className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 transition-colors duration-300">
+    <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div 
+        className="font-bold text-lg md:text-xl tracking-tight text-slate-800 dark:text-white cursor-pointer"
+        onClick={() => onNavigate(null)}
+      >
+        Fortune<span className="text-primary">.Onwe</span>
+      </div>
+      <div className="flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-4 border-r border-slate-200 dark:border-slate-700 pr-4 mr-1">
+            <a
+            href={portfolioData.personal.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-slate-500 hover:text-primary transition-colors"
+            >
+                <Icon name="Linkedin" size={20} />
+            </a>
+            <a
+            href={portfolioData.personal.twitter}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-slate-500 hover:text-primary transition-colors"
+            >
+                <Icon name="XLogo" size={18} />
+            </a>
+        </div>
+        <button
+          onClick={toggleTheme}
+          aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-transform transition-colors duration-200 active:scale-95"
+        >
+            <motion.div
+                key={darkMode ? 'sun' : 'moon'}
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                transition={{ duration: 0.2 }}
+            >
+                {darkMode ? <Icon name="Sun" size={18} /> : <Icon name="Moon" size={18} />}
+            </motion.div>
+        </button>
+      </div>
+    </div>
+  </nav>
+);
+
+const Hero = () => (
+  <FadeInSection className="relative pt-12 pb-16 md:pt-24 md:pb-24 px-4 max-w-5xl mx-auto">
+    <div className="grid md:grid-cols-3 gap-12 items-center">
+        
+        {/* Headshot - Order 1 on Mobile for better hierarchy */}
+        <div className="order-1 md:order-2 flex justify-center md:justify-end">
+            <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-2xl rotate-6 opacity-20 dark:opacity-40 blur-lg group-hover:rotate-12 transition-transform duration-500"></div>
+                <img 
+                    src={portfolioData.personal.headshot} 
+                    alt={portfolioData.personal.name}
+                    className="relative rounded-2xl w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 object-cover shadow-2xl border-4 border-white dark:border-slate-800 rotate-3 group-hover:rotate-0 transition-all duration-500 ease-out"
+                />
+            </div>
+        </div>
+
+        {/* Text Content - Order 2 on Mobile */}
+        <div className="md:col-span-2 flex flex-col gap-6 order-2 md:order-1">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold w-fit">
+                <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+                </span>
+                Open to Remote Opportunities
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
+                Building Scalable Products <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
+                Backed by Data &amp; Code.
+                </span>
+            </h1>
+
+            <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
+                {portfolioData.personal.summary}
+            </p>
+
+            <div className="flex flex-wrap gap-4 mt-4">
+                <a
+                href={portfolioData.personal.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg font-semibold hover:bg-slate-700 dark:hover:bg-slate-200 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                >
+                <Icon name="Linkedin" size={20} />
+                LinkedIn
+                </a>
+                 <a
+                href={portfolioData.personal.twitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-lg font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all hover:-translate-y-0.5"
+                >
+                <Icon name="XLogo" size={18} />
+                X (Twitter)
+                </a>
+                <a
+                href={`mailto:${portfolioData.personal.email}`}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all hover:-translate-y-0.5"
+                >
+                <Icon name="Mail" size={20} />
+                Email
+                </a>
+            </div>
+
+            <div className="flex items-center gap-6 mt-6 text-sm text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-2">
+                <Icon name="MapPin" size={16} />
+                {portfolioData.personal.location}
+                </div>
+            </div>
+        </div>
+    </div>
+  </FadeInSection>
+);
+
+const Skills = () => (
+  <FadeInSection id="skills" className="px-4 py-12 max-w-5xl mx-auto">
+    <h2 className="text-2xl font-bold mb-8 text-slate-900 dark:text-white flex items-center gap-2">
+      <Icon name="Code" className="text-primary" />
+      Core Competencies
+    </h2>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+      {portfolioData.skills.map((skillGroup) => (
+        <div
+          key={skillGroup.category}
+          className="p-6 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all hover:-translate-y-1"
+        >
+          <h3 className="font-bold text-md mb-4 text-slate-800 dark:text-slate-100 h-10 flex items-center">
+            {skillGroup.category}
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {skillGroup.items.map((item) => (
+              <span
+                key={item}
+                className="px-3 py-1 text-xs font-medium rounded-md bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </FadeInSection>
+);
+
+const AIDataLabSection = ({ onSelectProject }) => (
+  <FadeInSection id="ai-data-lab" className="px-4 py-12 max-w-5xl mx-auto">
+    <div className="flex items-center justify-between mb-8">
+      <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+        <Icon name="Database" className="text-primary" />
+        AI &amp; Data Lab
+      </h2>
+      <span className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+        Learning in public · Side projects
+      </span>
+    </div>
+
+    <div className="grid md:grid-cols-3 gap-6">
+      {portfolioData.aiProjects.map((project) => (
+        <button
+          key={project.id}
+          type="button"
+          onClick={() => onSelectProject(project.id)}
+          className="group text-left p-5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 h-full flex flex-col"
+        >
+          <div className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-300 mb-2">
+            {project.badge}
+          </div>
+          <h3 className="font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-primary transition-colors">
+            {project.title}
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+            {project.timeframe} · {project.role}
+          </p>
+          <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-3 flex-grow">
+            {project.summary}
+          </p>
+          <div className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary">
+            View case study
+            <Icon name="ChevronDown" size={14} className="rotate-[-90deg]" />
+          </div>
+        </button>
+      ))}
+    </div>
+  </FadeInSection>
+);
+
+const ProjectDetail = ({ project, onBack }) => (
+  <AnimatePresence mode="wait">
+    <motion.div
+      key={project.id}
+      className="px-4 py-12 max-w-5xl mx-auto"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -16 }}
+      transition={{ duration: 0.25 }}
+    >
+      <button
+        type="button"
+        onClick={onBack}
+        className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary transition-colors min-h-[44px]" // Increased touch target
+      >
+        <span className="inline-block rotate-180">
+          <Icon name="ChevronDown" size={16} />
+        </span>
+        Back to portfolio
+      </button>
+
+      <div className="mb-8 border-b border-slate-200 dark:border-slate-700 pb-8">
+        <div className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-300 mb-2">
+          {project.badge}
+        </div>
+        <h1 className="text-2xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">
+          {project.title}
+        </h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          {project.timeframe} · {project.role}
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-[2fr,1fr] gap-12">
+        <div className="space-y-8">
+          <section>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 mb-3">
+              Summary
+            </h2>
+            <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{project.summary}</p>
+          </section>
+
+          <section>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 mb-3">
+              Context & Problem
+            </h2>
+             <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg mb-4 border border-slate-100 dark:border-slate-700">
+                 <p className="text-slate-800 dark:text-slate-200 font-medium italic text-sm md:text-base">"{project.problem}"</p>
+             </div>
+            <ul className="space-y-2 text-slate-600 dark:text-slate-300 text-sm md:text-base">
+              {project.context.map((item) => (
+                <li key={item} className="flex gap-3">
+                  <span className="mt-2 w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 flex-shrink-0" />
+                  <span className="leading-relaxed">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 mb-3">
+              Approach
+            </h2>
+            <ul className="space-y-3 text-slate-600 dark:text-slate-300 text-sm md:text-base">
+              {project.approach.map((item) => (
+                <li key={item} className="flex gap-3">
+                  <span className="mt-2 w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />
+                  <span className="leading-relaxed">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 mb-3">
+              Impact / Outcomes
+            </h2>
+            <ul className="space-y-2 text-slate-600 dark:text-slate-300 text-sm md:text-base">
+              {project.impact.map((item) => (
+                <li key={item} className="flex gap-3">
+                  <Icon name="CheckCircle2" size={18} className="text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                  <span className="leading-relaxed">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+
+        <aside className="space-y-8">
+          <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700 md:sticky md:top-24">
+            <section className="mb-6">
+                <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
+                <Icon name="Briefcase" size={14} />
+                Responsibilities
+                </h3>
+                <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                {project.responsibilities.map((item) => (
+                    <li key={item}>• {item}</li>
+                ))}
+                </ul>
+            </section>
+
+            <section>
+                <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
+                <Icon name="Terminal" size={14} />
+                Stack / Tools
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                {project.stack.map((tool) => (
+                    <span
+                    key={tool}
+                    className="px-2.5 py-1 text-xs font-medium rounded-full bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600"
+                    >
+                    {tool}
+                    </span>
+                ))}
+                </div>
+            </section>
+          </div>
+        </aside>
+      </div>
+    </motion.div>
+  </AnimatePresence>
+);
+
+const ExperienceItem = ({ item }) => (
+  <div className="relative pl-10 sm:pl-12 pb-12 group">
+    {/* Timeline Dot */}
+    <div className="absolute left-0 top-1.5 w-8 h-8 bg-white dark:bg-slate-900 z-10 flex items-center justify-center">
+      <div className="w-3 h-3 rounded-full bg-primary group-hover:scale-125 transition-transform duration-300" />
+    </div>
+
+    <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between mb-2">
+      <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">{item.role}</h3>
+      <span className="text-sm font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded w-fit mt-1 sm:mt-0">
+        {item.period}
+      </span>
+    </div>
+
+    <div className="flex items-center gap-2 text-sm text-primary font-semibold mb-3">
+      <Icon name="Briefcase" size={14} />
+      {item.company}
+    </div>
+
+    {item.description && (
+      <p className="mb-3 text-slate-600 dark:text-slate-300 italic">{item.description}</p>
+    )}
+
+    {Array.isArray(item.achievements) && item.achievements.length > 0 && (
+      <ul className="space-y-2">
+        {item.achievements.map((ach) => (
+          <li
+            key={ach}
+            className="flex items-start gap-2 text-slate-600 dark:text-slate-300 text-sm leading-relaxed"
+          >
+            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-600 flex-shrink-0" />
+            <span>{ach}</span>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+);
+
+const CommunitySection = () => (
+    <FadeInSection id="community" className="px-4 py-12 max-w-5xl mx-auto">
+        <h2 className="text-2xl font-bold mb-8 text-slate-900 dark:text-white flex items-center gap-2">
+            <Icon name="Users" className="text-purple-600" />
+            Leadership, Community & Early Career
+        </h2>
+        <div className="grid md:grid-cols-2 gap-8">
+            {portfolioData.experienceCommunity.map((item, idx) => (
+                 <div key={idx} className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all hover:-translate-y-1">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-2">
+                        <div>
+                            <h3 className="font-bold text-lg text-slate-900 dark:text-white">{item.role}</h3>
+                            <div className="text-primary font-medium text-sm mt-1">{item.company}</div>
+                        </div>
+                        <span className="text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-1 rounded whitespace-nowrap w-fit">
+                            {item.period}
+                        </span>
+                    </div>
+                    <ul className="space-y-2">
+                        {item.achievements.map((ach, i) => (
+                            <li key={i} className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                                {ach}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            ))}
+        </div>
+    </FadeInSection>
+);
+
+
+const ExperienceSection = () => (
+  <FadeInSection id="experience" className="px-4 py-12 max-w-5xl mx-auto">
+    <div className="grid md:grid-cols-2 gap-12">
+      {/* Full Time Column */}
+      <div>
+        <h2 className="text-2xl font-bold mb-8 text-slate-900 dark:text-white flex items-center gap-2 sticky top-24 bg-slate-50 dark:bg-slate-900 py-2 z-10">
+          <Icon name="Server" className="text-primary" />
+          Technical Leadership
+        </h2>
+        <div className="relative">
+          {/* Vertical Line */}
+          <div className="absolute top-0 bottom-0 left-[15px] w-[2px] bg-slate-200 dark:bg-slate-700 z-0" />
+          {portfolioData.experienceMain.map((item) => (
+            <ExperienceItem
+              key={`${item.company}-${item.role}`}
+              item={item}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Ventures Column */}
+      <div>
+        <h2 className="text-2xl font-bold mb-8 text-slate-900 dark:text-white flex items-center gap-2 sticky top-24 bg-slate-50 dark:bg-slate-900 py-2 z-10">
+          <Icon name="LineChart" className="text-purple-500" />
+          Ventures &amp; Strategy
+        </h2>
+        <div className="relative">
+          {/* Vertical Line */}
+          <div className="absolute top-0 bottom-0 left-[15px] w-[2px] bg-slate-200 dark:bg-slate-700 z-0" />
+          {portfolioData.experienceVentures.map((item) => (
+            <ExperienceItem
+              key={`${item.company}-${item.role}`}
+              item={item}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  </FadeInSection>
+);
+
+const Footer = () => (
+  <footer className="mt-20 py-12 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+    <div className="max-w-5xl mx-auto px-4 grid md:grid-cols-2 gap-8">
+      <div>
+        <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-4">
+          Education &amp; Certification
+        </h3>
+        {portfolioData.education.map((edu) => (
+          <div key={edu.school} className="mb-4">
+            <div className="flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-200">
+              <Icon name="GraduationCap" size={16} />
+              {edu.school}
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-400 ml-6">
+              {edu.degree}, {edu.year}
+            </p>
+            {edu.details && (
+              <p className="text-xs text-slate-500 dark:text-slate-400 ml-6 mt-1">
+                {edu.details}
+              </p>
+            )}
+            {Array.isArray(edu.coursework) && edu.coursework.length > 0 && (
+              <p className="text-xs text-slate-500 dark:text-slate-400 ml-6 mt-1 leading-relaxed">
+                <span className="font-semibold">Key coursework:</span> {edu.coursework.join(', ')}.
+              </p>
+            )}
+          </div>
+        ))}
+        
+        <div className="mt-6 space-y-3">
+          <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-200 uppercase tracking-wider opacity-70">Verified Certifications</h4>
+          {portfolioData.certifications.map((cert) => (
+            <a
+              key={cert.id}
+              href={cert.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 -ml-2"
+            >
+              <Icon name="Award" size={16} className="text-yellow-500 mt-0.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
+              <div>
+                  <span className="font-medium block">{cert.name}</span>
+                  <span className="text-xs opacity-80 flex items-center gap-1">
+                    {cert.issuer} • ID: {cert.id}
+                    <Icon name="ArrowUpRight" size={10} />
+                  </span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col justify-between items-start md:items-end">
+        <div className="flex gap-4 mb-6">
+          <a
+            href={portfolioData.personal.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-slate-500 hover:text-primary transition-colors"
+          >
+            <Icon name="Linkedin" size={24} />
+          </a>
+          <a
+            href={portfolioData.personal.twitter}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-slate-500 hover:text-primary transition-colors"
+          >
+            <Icon name="XLogo" size={24} />
+          </a>
+          <a
+            href={`mailto:${portfolioData.personal.email}`}
+            className="text-slate-500 hover:text-primary transition-colors"
+          >
+            <Icon name="Mail" size={24} />
+          </a>
+        </div>
+        <p className="text-sm text-slate-400 text-left md:text-right">
+          © {new Date().getFullYear()} {portfolioData.personal.name}. <br />
+          Built with React &amp; Tailwind.
+        </p>
+      </div>
+    </div>
+  </footer>
+);
+
+export default function App() {
+  const [darkMode, setDarkMode] = useState(false);
+  const [activeProjectId, setActiveProjectId] = useState(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const storedTheme = window.localStorage.getItem('theme');
+    if (storedTheme === 'dark' || storedTheme === 'light') {
+      setDarkMode(storedTheme === 'dark');
+      return;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setDarkMode(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
+
+  const toggleTheme = () => setDarkMode((prev) => !prev);
+
+  // Get active project data
+  const activeProject = activeProjectId
+    ? portfolioData.aiProjects.find((p) => p.id === activeProjectId)
+    : null;
+
+  // Navigation handler
+  const handleNavigate = (viewId) => {
+      setActiveProjectId(viewId);
+      window.scrollTo(0, 0);
+  };
+
+  return (
+    <div className={darkMode ? 'dark' : ''}>
+      <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300 font-sans selection:bg-primary selection:text-white">
+        <Navbar darkMode={darkMode} toggleTheme={toggleTheme} onNavigate={handleNavigate} />
+        
+        <main>
+            {activeProject ? (
+                <ProjectDetail project={activeProject} onBack={() => handleNavigate(null)} />
+            ) : (
+                <>
+                    <Hero />
+                    <Skills />
+                    <AIDataLabSection onSelectProject={handleNavigate} />
+                    <ExperienceSection />
+                    <CommunitySection />
+                </>
+            )}
+        </main>
+        
+        <Footer />
+      </div>
+    </div>
+  );
+}
